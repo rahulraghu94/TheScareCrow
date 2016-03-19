@@ -5,6 +5,7 @@ import mpu6050
 import logging
 import select
 import sys
+import Adafruit_BBIO.PWM as PWM
 
 motors = []
 for i in ["P9_14", "P9_16", "P9_21", "P9_22"]:
@@ -96,6 +97,11 @@ def loop():
             print "%.2f" % (i),
         print "$"               # ending delimiter
 
-while(True):
-    loop()
+try:
+    while(True):
+        loop()
+except:
+    PWM.cleanup()               # clean up PWM pins in /sys/devices/ocp.3/
+    print "Cleaned up. Exiting..."
+    raise                       # reraise exception
 

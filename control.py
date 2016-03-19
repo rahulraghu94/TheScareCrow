@@ -17,18 +17,18 @@ mpu.dmpInitialize()
 mpu.setDMPEnabled(True)
 packetSize = mpu.dmpGetFIFOPacketSize()
 
-cmds = {'p' : 0, 'r' : 0, 'y' : 0,
-        'pp' : 0, 'pi' : 0, 'pd' : 0,
-        'rp' : 0, 'ri' : 0, 'rd' : 0,
-        'yp' : 0, 'yi' : 0, 'yd' : 0,
-        't' : 0}
+cmds = { 'p' : 0, 'r' : 0, 'y' : 0, # desired pitch, roll and yaw
+         'pp' : 0, 'pi' : 0, 'pd' : 0, # Pitch PID
+         'rp' : 0, 'ri' : 0, 'rd' : 0, # Roll PID
+         'yp' : 0, 'yi' : 0, 'yd' : 0, # Yaw PID
+         't' : 0 }                     # Current throttle value
 
 def parseInput(data):
-    cmd, value = str.split(' ', data)
+    cmd, value = str.split(' ', data) # command is in the format <command> <value>
     cmds[cmd] = value
 
     if cmd == 't':
-        # value already set and is used directly from the dict
+        # value already set and is used directly from the dictionary
         pass
     elif cmd == 'p' or cmd == 'r' or cmd == 'y':
         # sets the set points for the p, r and y PIDs
@@ -83,14 +83,18 @@ def loop():
         motors[3].setPower(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
 
         # debug info
-        print "%f %f %f " % (mpuVal['pitch'], mpuVal['roll'], mpuVal['yaw']),
-        print "%f %f %f " % (cmds['p'], cmds['r'], cmds['y']),
-        print "%f %f %f " % (cmds['pp'], cmds['pi'], cmds['pd']),
-        print "%f %f %f " % (cmds['rp'], cmds['ri'], cmds['rd']),
-        print "%f %f %f " % (cmds['yp'], cmds['yi'], cmds['yd']),
-        for i in motors:
-            print "%f " % (i.getPower()),
-        print ""
+        print "^",              # beginning delimiter
+        for i in [
+                mpuVal['pitch'], mpuVal['roll'], mpuVal['yaw'],
+                cmds['p'], cmds['r'], cmds['y'],
+                cmds['pp'], cmds['pi'], cmds['pd'],
+                cmds['rp'], cmds['ri'], cmds['rd'],
+                cmds['yp'], cmds['yi'], cmds['yd'],
+                motors[0].getPower(), motors[1].getPower(),
+                motors[2].getPower(), motors[3].getPower()
+        ]:
+            print "%.2f" % (i),
+        print "$"               # ending delimiter
 
 while(True):
     loop()

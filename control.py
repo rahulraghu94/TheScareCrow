@@ -26,23 +26,23 @@ cmds = { 'p' : 0, 'r' : 0, 'y' : 0, # desired pitch, roll and yaw
 
 def parseInput(data):
     cmd, value = data.split(' ') # command is in the format <string>.split(<delimiter>, [<max-split>])
-    cmds[cmd] = value
+    cmds[cmd] = float(value)
 
     if cmd == 't':
         # value already set and is used directly from the dictionary
         pass
     elif cmd == 'p' or cmd == 'r' or cmd == 'y':
         # sets the set points for the p, r and y PIDs
-        pid[cmd].setPoint(value)
+        pid[cmd].setPoint(float(value))
     else:
         # cmd[0] gives the PID (pitch, roll or yaw PID)
         # cmd[1] gives the constant to be set
         if cmd[1] == 'p':
-            pid[cmd[0]].setKp(value)
+            pid[cmd[0]].setKp(float(value))
         elif cmd[1] == 'i':
-            pid[cmd[0]].setKi(value)
+            pid[cmd[0]].setKi(float(value))
         elif cmd[1] == 'd':
-            pid[cmd[0]].setKd(value)
+            pid[cmd[0]].setKd(float(value))
 
 def loop():
 

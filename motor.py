@@ -10,7 +10,12 @@ class motor:
         self.pin = pin
         self.power = self.MIN_POWER
         # start motor with power = 0 (5 on the scale of [5, 10])
-        PWM.start(self.pin, 5, 50)
+        PWM.start(self.pin, 5)
+        # setting frequency in the initializer causes weird errors as
+        # explained here:
+        # https://github.com/adafruit/adafruit-beaglebone-io-python/issues/66
+        # Would be good to find a fix and patch the upstream repository
+        PWM.set_frequency(self.pin, 50)
 
     def setPower(self, power):
         if power > self.MAX_POWER:

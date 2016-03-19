@@ -25,7 +25,7 @@ cmds = { 'p' : 0, 'r' : 0, 'y' : 0, # desired pitch, roll and yaw
          't' : 0 }                     # Current throttle value
 
 def parseInput(data):
-    cmd, value = str.split(' ', data) # command is in the format <command> <value>
+    cmd, value = data.split(' ') # command is in the format <string>.split(<delimiter>, [<max-split>])
     cmds[cmd] = value
 
     if cmd == 't':

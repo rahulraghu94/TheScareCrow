@@ -64,7 +64,13 @@ def getMpuAngles():
         while fifoCount < packetSize:
             fifoCount = mpu.getFIFOCount()
 
-        result = mpu.getFIFOBytes(packetSize)
+        # fifoCount will be greater than 0 the first time
+        while (fifoCount / packetSize) > 0:
+            result = mpu.getFIFOBytes(packetSize)
+            # track FIFO count here in case there is > 1 packet available
+            # (this lets us immediately read more without waiting for an interrupt)
+            fifoCount -= packetSize
+
         q = mpu.dmpGetQuaternion(result)
         g = mpu.dmpGetGravity(q)
         mpuVal = mpu.dmpGetYawPitchRoll(q, g)

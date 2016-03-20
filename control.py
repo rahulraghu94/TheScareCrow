@@ -44,8 +44,7 @@ def parseInput(data):
         elif cmd[1] == 'd':
             pid[cmd[0]].setKd(float(value))
 
-def loop():
-
+def getMpuAngles():
     mpuIntStatus = mpu.getIntStatus()
     if mpuIntStatus >= 2: # check for DMP data ready interrupt (this should happen frequently)
         # get current FIFO count
@@ -77,36 +76,42 @@ def loop():
         # (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize
 
-        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-            parseInput(sys.stdin.readline())
+        return mpuVal
+    else:
+        return None
 
-        op = {}
-        for i in mpuVal:
-            op[i] = pid[i[0]].update(mpuVal[i])
+def updateMotors(mpuAngles):
+    op = {}
+    for i in mpuAngles:
+        op[i] = pid[i[0]].update(mpuAngles[i])
 
-        motors[0].setPower(cmds['t'] + op['pitch'] - op['roll'] - op['yaw'])
-        motors[1].setPower(cmds['t'] - op['pitch'] - op['roll'] + op['yaw'])
-        motors[2].setPower(cmds['t'] - op['pitch'] + op['roll'] - op['yaw'])
-        motors[3].setPower(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
+    motors[0].setPower(cmds['t'] + op['pitch'] - op['roll'] - op['yaw'])
+    motors[1].setPower(cmds['t'] - op['pitch'] - op['roll'] + op['yaw'])
+    motors[2].setPower(cmds['t'] - op['pitch'] + op['roll'] - op['yaw'])
+    motors[3].setPower(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
 
-        # debug info
-        print "^",              # beginning delimiter
-        for i in [
-                fifoCount,
-                mpuVal['pitch'], mpuVal['roll'], mpuVal['yaw'],
-                cmds['p'], cmds['r'], cmds['y'],
-                cmds['pp'], cmds['pi'], cmds['pd'],
-                cmds['rp'], cmds['ri'], cmds['rd'],
-                cmds['yp'], cmds['yi'], cmds['yd'],
-                motors[0].getPower(), motors[1].getPower(),
-                motors[2].getPower(), motors[3].getPower()
-        ]:
-            print "%.2f" % (i),
-        print "$"               # ending delimiter
+    # debug info
+    print "^",              # beginning delimiter
+    for i in [
+            mpuAngles['pitch'], mpuAngles['roll'], mpuAngles['yaw'],
+            cmds['p'], cmds['r'], cmds['y'],
+            cmds['pp'], cmds['pi'], cmds['pd'],
+            cmds['rp'], cmds['ri'], cmds['rd'],
+            cmds['yp'], cmds['yi'], cmds['yd'],
+            motors[0].getPower(), motors[1].getPower(),
+            motors[2].getPower(), motors[3].getPower()
+    ]:
+        print "%.2f" % (i),
+    print "$"               # ending delimiter
 
 try:
     while(True):
-        loop()
+        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+            parseInput(sys.stdin.readline())
+
+        mpuAngles = getMpuAngles()
+        if (mpuAngles):
+            updateMotors(mpuAngles)
 except:
     PWM.cleanup()               # clean up PWM pins in /sys/devices/ocp.3/
     print "Cleaned up. Exiting..."

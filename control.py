@@ -50,11 +50,17 @@ def loop():
     if mpuIntStatus >= 2: # check for DMP data ready interrupt (this should happen frequently)
         # get current FIFO count
         fifoCount = mpu.getFIFOCount()
-        # check for overflow (this should never happen unless our code is too inefficient)
-        if fifoCount == 1024:
+        # check for overflow (this should never happen unless our code
+        # is too inefficient)
+        # The buffer size is actually 1024, but it starts to give bad
+        # values close to 1024. Also, a smaller buffer means fresher
+        # values.
+        # A packet, by default, is 42 bytes in size. So 10 packets
+        # should be 420 bytes
+        if fifoCount == packetSize * 10:
         # reset so we can continue cleanly
             mpu.resetFIFO()
-            logging.debug('FIFO overflow!')
+            print 'FIFO overflow!'
         fifoCount = mpu.getFIFOCount()
         while fifoCount < packetSize:
             fifoCount = mpu.getFIFOCount()
@@ -86,6 +92,7 @@ def loop():
         # debug info
         print "^",              # beginning delimiter
         for i in [
+                fifoCount,
                 mpuVal['pitch'], mpuVal['roll'], mpuVal['yaw'],
                 cmds['p'], cmds['r'], cmds['y'],
                 cmds['pp'], cmds['pi'], cmds['pd'],
@@ -104,4 +111,3 @@ except:
     PWM.cleanup()               # clean up PWM pins in /sys/devices/ocp.3/
     print "Cleaned up. Exiting..."
     raise                       # reraise exception
-

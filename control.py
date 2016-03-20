@@ -96,6 +96,14 @@ def updateMotors(mpuAngles):
     motors[2].setPower(cmds['t'] - op['pitch'] + op['roll'] - op['yaw'])
     motors[3].setPower(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
 
+def loop():
+    if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+            parseInput(sys.stdin.readline())
+
+    mpuAngles = getMpuAngles()
+    if (mpuAngles):
+        updateMotors(mpuAngles)
+
     # debug info
     print "^",              # beginning delimiter
     for i in [
@@ -112,12 +120,8 @@ def updateMotors(mpuAngles):
 
 try:
     while(True):
-        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-            parseInput(sys.stdin.readline())
+        loop()
 
-        mpuAngles = getMpuAngles()
-        if (mpuAngles):
-            updateMotors(mpuAngles)
 except:
     PWM.cleanup()               # clean up PWM pins in /sys/devices/ocp.3/
     print "Cleaned up. Exiting..."

@@ -1,5 +1,4 @@
 import Adafruit_BBIO.PWM as PWM
-from scipy.interpolate import interp1d
 import logging
 
 class motor:
@@ -28,8 +27,7 @@ class motor:
         # map values from [0,100] to [5,10].
         # A frequency of 50Hz translates to a period of 20ms
         # pulse of 1ms is no power, pulse of 2ms is full power.
-        power = interp1d([self.MIN_POWER, self.MAX_POWER],
-                         [5.0, 10.0])(self.power)
+        power = 5 + self.MAX_POWER / 20.0
         PWM.set_duty_cycle(self.pin, power)
 
     def getPower(self):

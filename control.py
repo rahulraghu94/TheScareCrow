@@ -60,7 +60,7 @@ def getMpuAngles():
         # reset so we can continue cleanly
             mpu.resetFIFO()
             print 'FIFO overflow!'
-        fifoCount = mpu.getFIFOCount()
+            fifoCount = mpu.getFIFOCount()
         while fifoCount < packetSize:
             fifoCount = mpu.getFIFOCount()
 

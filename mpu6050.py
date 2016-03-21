@@ -1534,10 +1534,10 @@ class MPU6050:
         data = {
             # yaw: (about Z axis)
             'yaw' : atan2(2 * q['x'] * q['y'] - 2 * q['w'] * q['z'], 2 * q['w'] * q['w'] + 2 * q['x'] * q['x'] - 1),
-            # pitch: (nose up/down, about Y axis)
-            'pitch' : atan(g['x'] / sqrt(g['y'] * g['y'] + g['z'] * g['z'])),
-            # roll: (tilt left/right, about X axis)
-            'roll' : atan(g['y'] / sqrt(g['x'] * g['x'] + g['z'] * g['z']))}
+            # roll: (tilt left/right, about Y axis)
+            'roll' : atan(g['x'] / sqrt(g['y'] * g['y'] + g['z'] * g['z'])),
+            # pitch: (nose up/down, about X axis)
+            'pitch' : atan(g['y'] / sqrt(g['x'] * g['x'] + g['z'] * g['z']))}
 
         return data
 

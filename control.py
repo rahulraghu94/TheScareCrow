@@ -104,20 +104,19 @@ def loop():
     mpuAngles = getMpuAngles()
     if (mpuAngles):
         updateMotors(mpuAngles)
-
-    # debug info
-    print "^",              # beginning delimiter
-    for i in [
-            mpuAngles['pitch'], mpuAngles['roll'], mpuAngles['yaw'],
-            cmds['p'], cmds['r'], cmds['y'],
-            cmds['pp'], cmds['pi'], cmds['pd'],
-            cmds['rp'], cmds['ri'], cmds['rd'],
-            cmds['yp'], cmds['yi'], cmds['yd'],
-            motors[0].read(), motors[1].read(),
-            motors[2].read(), motors[3].read()
-    ]:
-        print "%.2f" % (i),
-    print "$"               # ending delimiter
+        # debug info
+        print "^",              # beginning delimiter
+        for i in [
+                mpuAngles['pitch'], mpuAngles['roll'], mpuAngles['yaw'],
+                cmds['p'], cmds['r'], cmds['y'],
+                cmds['pp'], cmds['pi'], cmds['pd'],
+                cmds['rp'], cmds['ri'], cmds['rd'],
+                cmds['yp'], cmds['yi'], cmds['yd'],
+                motors[0].read(), motors[1].read(),
+                motors[2].read(), motors[3].read()
+        ]:
+            print "%.2f" % (i),
+        print "$"               # ending delimiter
 
 try:
 

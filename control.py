@@ -33,7 +33,7 @@ def parseInput(data):
         pass
     elif cmd == 'p' or cmd == 'r' or cmd == 'y':
         # sets the set points for the p, r and y PIDs
-        pid[cmd].setPoint(float(value))
+        pid[cmd].SetPoint = float(value)
     else:
         # cmd[0] gives the PID (pitch, roll or yaw PID)
         # cmd[1] gives the constant to be set

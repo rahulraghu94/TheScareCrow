@@ -25,8 +25,12 @@ cmds = { 'p' : 0, 'r' : 0, 'y' : 0, # desired pitch, roll and yaw
          't' : 0 }                     # Current throttle value
 
 def parseInput(data):
-    cmd, value = data.split(' ') # command is in the format <string>.split(<delimiter>, [<max-split>])
-    cmds[cmd] = float(value)
+    try:
+        cmd, value = data.split(' ') # command is in the format <string>.split(<delimiter>, [<max-split>])
+        cmds[cmd] = float(value)
+    except ValueError:
+        print "Invalid input!"
+        return
 
     if cmd == 't':
         # value already set and is used directly from the dictionary

@@ -1,15 +1,15 @@
-import motor as Motor
 import pid as PID
 import math
 import mpu6050
 import logging
 import select
 import sys
-import Adafruit_BBIO.PWM as PWM
+from bbio import *
+from bbio.libraries.Servo import *
 
 motors = []
-for i in ["P9_14", "P9_16", "P9_21", "P9_22"]:
-    motors.append(Motor.motor(i))
+for i in [PWM1A, PWM1B, PWM2A, PWM2B]:
+    motors.append(Servo(i))
 
 pid = {'y' : PID.PID(), 'p' : PID.PID(), 'r' : PID.PID()}
 
@@ -91,10 +91,10 @@ def updateMotors(mpuAngles):
     for i in mpuAngles:
         op[i] = pid[i[0]].update(mpuAngles[i])
 
-    motors[0].setPower(cmds['t'] + op['pitch'] - op['roll'] - op['yaw'])
-    motors[1].setPower(cmds['t'] - op['pitch'] - op['roll'] + op['yaw'])
-    motors[2].setPower(cmds['t'] - op['pitch'] + op['roll'] - op['yaw'])
-    motors[3].setPower(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
+    motors[0].write(cmds['t'] + op['pitch'] - op['roll'] - op['yaw'])
+    motors[1].write(cmds['t'] - op['pitch'] - op['roll'] + op['yaw'])
+    motors[2].write(cmds['t'] - op['pitch'] + op['roll'] - op['yaw'])
+    motors[3].write(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
 
 def loop():
     if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
@@ -112,8 +112,8 @@ def loop():
             cmds['pp'], cmds['pi'], cmds['pd'],
             cmds['rp'], cmds['ri'], cmds['rd'],
             cmds['yp'], cmds['yi'], cmds['yd'],
-            motors[0].getPower(), motors[1].getPower(),
-            motors[2].getPower(), motors[3].getPower()
+            motors[0].read(), motors[1].read(),
+            motors[2].read(), motors[3].read()
     ]:
         print "%.2f" % (i),
     print "$"               # ending delimiter

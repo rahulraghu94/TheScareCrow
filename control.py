@@ -120,10 +120,12 @@ def loop():
     print "$"               # ending delimiter
 
 try:
+
     while(True):
         loop()
 
 except:
-    PWM.cleanup()               # clean up PWM pins in /sys/devices/ocp.3/
+    for i in motors:
+        i.detach()
     print "Cleaned up. Exiting..."
     raise                       # reraise exception

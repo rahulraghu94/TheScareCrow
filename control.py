@@ -6,6 +6,7 @@ import select
 import sys
 from bbio import *
 from bbio.libraries.Servo import *
+import time
 
 motors = []
 for i in [PWM1A, PWM1B, PWM2A, PWM2B]:
@@ -109,6 +110,7 @@ def loop():
     mpuAngles = getMpuAngles()
     if (mpuAngles):
         updateMotors(mpuAngles)
+        print "%f" % time.time()
         # debug info
         print "^",              # beginning delimiter
         for i in [

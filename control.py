@@ -96,6 +96,9 @@ def updateMotors(mpuAngles):
     op = {}
     for i in mpuAngles:
         error = pid[i[0]].SetPoint - mpuAngles[i]
+        # address the issue where the angle switches from +/- 179 to +/- 179.
+        if 360 - error < error:
+            error = - (360 - error)
         pid[i[0]].update(error)
         op[i] = pid[i[0]].output
 

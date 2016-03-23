@@ -62,7 +62,7 @@ class PID:
 
         self.output = 0.0
 
-    def update(self, feedback_value):
+    def update(self, error):
         """Calculates PID value for given reference feedback
         .. math::
             u(t) = K_p e(t) + K_i \int_{0}^{t} e(t)dt + K_d {de}/{dt}
@@ -70,7 +70,6 @@ class PID:
            :align:   center
            Test PID with Kp=1.2, Ki=1, Kd=0.001 (test_pid.py)
         """
-        error = self.SetPoint - feedback_value
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time

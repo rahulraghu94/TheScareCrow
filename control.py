@@ -95,7 +95,8 @@ def getMpuAngles():
 def updateMotors(mpuAngles):
     op = {}
     for i in mpuAngles:
-        pid[i[0]].update(mpuAngles[i])
+        error = pid[i[0]].SetPoint - mpuAngles[i]
+        pid[i[0]].update(error)
         op[i] = pid[i[0]].output
 
     motors[0].write(cmds['t'] + op['pitch'] - op['roll'] - op['yaw'])

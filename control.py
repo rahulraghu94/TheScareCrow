@@ -50,32 +50,26 @@ def parseInput(data):
             pid[cmd[0]].setKd(float(value))
 
 def getMpuAngles():
-    mpuIntStatus = mpu.getIntStatus()
-    if mpuIntStatus >= 2: # check for DMP data ready interrupt (this should happen frequently)
-        # get current FIFO count
-        fifoCount = mpu.getFIFOCount()
-        # check for overflow (this should never happen unless our code
-        # is too inefficient)
-        # The buffer size is actually 1024, but it starts to give bad
-        # values close to 1024. Also, a smaller buffer means fresher
-        # values.
-        # A packet, by default, is 42 bytes in size. So 10 packets
-        # should be 420 bytes
-        if fifoCount == packetSize * 10:
+    # get current FIFO count
+    fifoCount = mpu.getFIFOCount()
+    # check for overflow (this should never happen unless our code
+    # is too inefficient)
+    # The buffer size is actually 1024, but it starts to give bad
+    # values close to 1024. Also, a smaller buffer means fresher
+    # values.
+    # A packet, by default, is 42 bytes in size. So 10 packets
+    # should be 420 bytes
+    if fifoCount == packetSize * 10:
         # reset so we can continue cleanly
-            mpu.resetFIFO()
-            print 'FIFO overflow!'
-            fifoCount = mpu.getFIFOCount()
-        while fifoCount < packetSize:
-            fifoCount = mpu.getFIFOCount()
+        mpu.resetFIFO()
+        print 'FIFO overflow!'
+        fifoCount = mpu.getFIFOCount()
+    while fifoCount < packetSize:
+        fifoCount = mpu.getFIFOCount()
 
-        # fifoCount will be greater than 0 the first time
-        while (fifoCount / packetSize) > 0:
-            result = mpu.getFIFOBytes(packetSize)
-            # track FIFO count here in case there is > 1 packet available
-            # (this lets us immediately read more without waiting for an interrupt)
-            fifoCount -= packetSize
-
+    # fifoCount / packetSize will be greater than 0 the first time
+    while (fifoCount / packetSize) > 0:
+        result = mpu.getFIFOBytes(packetSize)
         q = mpu.dmpGetQuaternion(result)
         g = mpu.dmpGetGravity(q)
         mpuVal = mpu.dmpGetYawPitchRoll(q, g)
@@ -83,14 +77,15 @@ def getMpuAngles():
         for i in mpuVal:
             mpuVal[i] = mpuVal[i] * 180 / math.pi
 
+        updateMotors(mpuVal)
+
         print "%.2f" % fifoCount,
         # track FIFO count here in case there is > 1 packet available
         # (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize
 
-        return mpuVal
-    else:
-        return None
+    # return last mpuVal
+    return mpuVal
 
 def updateMotors(mpuAngles):
     op = {}
@@ -107,14 +102,18 @@ def updateMotors(mpuAngles):
     motors[2].write(cmds['t'] - op['pitch'] + op['roll'] - op['yaw'])
     motors[3].write(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
 
-def loop():
-    if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-            parseInput(sys.stdin.readline())
+try:
+    mpuAngles = {'pitch': 0, 'roll': 0, 'yaw': 0}
+    while(True):
+        # check for DMP data -- should happen frequently
+        if mpu.getIntStatus() >= 2:
+            mpuAngles = updateMpuValues()
 
-    mpuAngles = getMpuAngles()
-    if (mpuAngles):
-        updateMotors(mpuAngles)
-        print "%f" % time.time()
+        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+            parseInput(sys.stdin.readline())
+            updateMotors(mpuAngles)
+
+        print "%f" % time.time(),
         # debug info
         print "^",              # beginning delimiter
         for i in [
@@ -128,11 +127,6 @@ def loop():
         ]:
             print "%.2f" % (i),
         print "$"               # ending delimiter
-
-try:
-
-    while(True):
-        loop()
 
 except:
     for i in motors:

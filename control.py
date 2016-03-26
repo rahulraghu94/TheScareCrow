@@ -60,7 +60,7 @@ def getMpuAngles():
     # values.
     # A packet, by default, is 42 bytes in size. So 10 packets
     # should be 420 bytes
-    if fifoCount == packetSize * 10:
+    if fifoCount >= packetSize * 10 and fifoCount % packetSize == 0:
         # reset so we can continue cleanly
         mpu.resetFIFO()
         print 'FIFO overflow!'

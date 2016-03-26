@@ -7,7 +7,6 @@ import sys
 from bbio import *
 from bbio.libraries.Servo import *
 import time
-from __future__ import print_function
 
 motors = []
 for i in [PWM1A, PWM1B, PWM2A, PWM2B]:
@@ -109,7 +108,7 @@ try:
     print "Calibrating... Keep steady for 15 seconds."
     for i in range(15):
         time.sleep(1)
-        print("%2d seconds left\r" % (15 - (i + 1)), end="")
+        print "%2d seconds left" % (15 - (i + 1))
         sys.stdout.flush()
 
     while(True):

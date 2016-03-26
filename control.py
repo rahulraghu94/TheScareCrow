@@ -65,10 +65,9 @@ def getMpuAngles():
         mpu.resetFIFO()
         print 'FIFO overflow!'
         fifoCount = mpu.getFIFOCount()
+
     while fifoCount < packetSize:
         fifoCount = mpu.getFIFOCount()
-
-    # fifoCount / packetSize will be greater than 0 the first time
     while (fifoCount / packetSize) > 0:
         result = mpu.getFIFOBytes(packetSize)
         q = mpu.dmpGetQuaternion(result)

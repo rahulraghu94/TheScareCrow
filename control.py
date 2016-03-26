@@ -7,6 +7,7 @@ import sys
 from bbio import *
 from bbio.libraries.Servo import *
 import time
+from __future__ import print_function
 
 motors = []
 for i in [PWM1A, PWM1B, PWM2A, PWM2B]:
@@ -104,6 +105,14 @@ def updateMotors(mpuAngles):
 
 try:
     mpuAngles = {'pitch': 0, 'roll': 0, 'yaw': 0}
+
+    # sleep for 15 seconds to calibrate
+    print "Calibrating... Keep steady for 15 seconds."
+    for i in range(15):
+        time.sleep(1)
+        print("%2d seconds left\r" % (15 - (i + 1)), end="")
+        sys.stdout.flush()
+
     while(True):
         # check for DMP data -- should happen frequently
         if mpu.getIntStatus() >= 2:

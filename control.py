@@ -52,7 +52,7 @@ def parseInput(data):
 
 def getMpuAngles():
     # get current FIFO count
-    fifoCount = mpu.getFIFOCount()
+    firstFifoCount = fifoCount = mpu.getFIFOCount()
     # check for overflow (this should never happen unless our code
     # is too inefficient)
     # The buffer size is actually 1024, but it starts to give bad
@@ -79,13 +79,12 @@ def getMpuAngles():
 
         updateMotors(mpuVal)
 
-        print "%.2f" % fifoCount,
         # track FIFO count here in case there is > 1 packet available
         # (this lets us immediately read more without waiting for an interrupt)
         fifoCount -= packetSize
 
     # return last mpuVal
-    return mpuVal
+    return mpuVal, firstFifoCount
 
 def updateMotors(mpuAngles):
     op = {}
@@ -105,6 +104,7 @@ def updateMotors(mpuAngles):
 try:
     mpuAngles = {'pitch': 0, 'roll': 0, 'yaw': 0}
 
+    startTime = time.time()
     # sleep for 15 seconds to calibrate
     print "Calibrating... Keep steady for 15 seconds."
     for i in range(15):
@@ -115,18 +115,20 @@ try:
     while(True):
         # check for DMP data -- should happen frequently
         if mpu.getIntStatus() >= 2:
-            mpuAngles = updateMpuValues()
+            mpuAngles, fifoCount = updateMpuValues()
 
         if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
             parseInput(sys.stdin.readline())
             updateMotors(mpuAngles)
 
-        print "%f" % time.time(),
         # debug info
         print "^",              # beginning delimiter
+        print "%11.6f" % time.time() - startTime,
         for i in [
+                fifoCount,
                 mpuAngles['pitch'], mpuAngles['roll'], mpuAngles['yaw'],
                 cmds['p'], cmds['r'], cmds['y'],
+                cmds['t'],
                 cmds['pp'], cmds['pi'], cmds['pd'],
                 cmds['rp'], cmds['ri'], cmds['rd'],
                 cmds['yp'], cmds['yi'], cmds['yd'],

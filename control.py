@@ -116,7 +116,7 @@ try:
 
     startTime = time.time()
 
-    if sys.argv[1] == "-c":
+    if len(sys.argv) > 1 and sys.argv[1] == "-c":
         calibrate()
 
     # sleep for 15 seconds to calibrate

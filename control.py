@@ -101,10 +101,24 @@ def updateMotors(mpuAngles):
     motors[2].write(cmds['t'] - op['pitch'] + op['roll'] - op['yaw'])
     motors[3].write(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
 
+def calibrate():
+    print "Calibrating..."
+    for i in motors:
+        i.write(180)
+    print "Press any key to continue..."
+    sys.stdin.read(1)
+    for i in motors:
+        i.write(0)
+    print "Calibrated."
+
 try:
     mpuAngles = {'pitch': 0, 'roll': 0, 'yaw': 0}
 
     startTime = time.time()
+
+    if sys.argv[1] == "-c":
+        calibrate()
+
     # sleep for 15 seconds to calibrate
     print "Calibrating... Keep steady for 15 seconds."
     for i in range(15):

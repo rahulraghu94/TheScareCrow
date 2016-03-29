@@ -49,7 +49,7 @@ def parseInput(data):
         elif cmd[1] == 'd':
             pid[cmd[0]].setKd(float(value))
 
-def getMpuAngles():
+def updateMpuValues():
     # get current FIFO count
     firstFifoCount = fifoCount = mpu.getFIFOCount()
     # check for overflow (this should never happen unless our code

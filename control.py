@@ -123,7 +123,7 @@ try:
 
         # debug info
         print "^",              # beginning delimiter
-        print "%11.6f" % time.time() - startTime,
+        print "%f" % (time.time() - startTime),
         for i in [
                 fifoCount,
                 mpuAngles['pitch'], mpuAngles['roll'], mpuAngles['yaw'],

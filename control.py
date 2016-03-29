@@ -59,7 +59,7 @@ def updateMpuValues():
     # values.
     # A packet, by default, is 42 bytes in size. So 10 packets
     # should be 420 bytes
-    if ((fifoCount >= packetSize * 10 and fifoCount % packetSize == 0)
+    if ((fifoCount >= packetSize * 3 and fifoCount % packetSize == 0)
     or fifoCount == 1024):
         # reset so we can continue cleanly
         mpu.resetFIFO()

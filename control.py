@@ -96,10 +96,10 @@ def updateMotors(mpuAngles):
         pid[i[0]].update(error)
         op[i] = pid[i[0]].output
 
-    motors[0].write(cmds['t'] + op['pitch'] - op['roll'] - op['yaw'])
-    motors[1].write(cmds['t'] - op['pitch'] - op['roll'] + op['yaw'])
-    motors[2].write(cmds['t'] - op['pitch'] + op['roll'] - op['yaw'])
-    motors[3].write(cmds['t'] + op['pitch'] + op['roll'] + op['yaw'])
+    motors[0].write(cmds['t'] + op['pitch'] + op['roll'] - op['yaw'])
+    motors[1].write(cmds['t'] - op['pitch'] + op['roll'] + op['yaw'])
+    motors[2].write(cmds['t'] - op['pitch'] - op['roll'] - op['yaw'])
+    motors[3].write(cmds['t'] + op['pitch'] - op['roll'] + op['yaw'])
 
 def calibrate():
     print "Calibrating..."

@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 #
 # This file is part of IvPID.
@@ -41,7 +40,7 @@ class PID:
         self.Ki = I
         self.Kd = D
 
-        self.sample_time = 0.00
+        self.sample_time = 0.01
         self.current_time = time.time()
         self.last_time = self.current_time
 

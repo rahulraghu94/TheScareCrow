@@ -54,7 +54,7 @@ class PID:
         self.ITerm = 0.0
         self.DTerm = 0.0
         self.last_error = 0.0
-        self.last_input = 0.0
+        self.last_feedback = 0.0
 
         # Windup Guard
         self.int_error = 0.0
@@ -62,7 +62,7 @@ class PID:
 
         self.output = 0.0
 
-    def update(self, error, cur_input):
+    def update(self, error, feedback_value):
         """Calculates PID value for given reference feedback
         .. math::
             u(t) = K_p e(t) + K_i \int_{0}^{t} e(t)dt + K_d {de}/{dt}
@@ -73,9 +73,9 @@ class PID:
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
-        delta_input = cur_input - self.last_input
-        if delta_input > 360 - delta_input:
-            delta_input = 360 - delta_input
+        delta_feedback = feedback_value - self.last_feedback
+        if delta_feedback > 360 - delta_feedback:
+            delta_feedback = 360 - delta_feedback
 
         if (delta_time >= self.sample_time):
             self.PTerm = self.Kp * error
@@ -88,12 +88,12 @@ class PID:
 
             self.DTerm = 0.0
             if delta_time > 0:
-                self.DTerm = delta_input / delta_time
+                self.DTerm = delta_feedback / delta_time
 
             # Remember last time and last error for next calculation
             self.last_time = self.current_time
             self.last_error = error
-            self.last_input = cur_input
+            self.last_feedback = feedback_value
 
             self.output = self.PTerm + self.ITerm - (self.Kd * self.DTerm)
 

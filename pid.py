@@ -73,12 +73,13 @@ class PID:
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
-        delta_feedback = feedback_value - self.last_feedback
-        if delta_feedback > 360 - delta_feedback:
-            delta_feedback = 360 - delta_feedback
 
         if (delta_time >= self.sample_time):
             error = calculate_error(self.SetPoint, feedback_value)
+            # The calculation for delta_feedback is the same as error
+            # calculation with desired = last_feedback
+            # and actual = feedback_value
+            delta_feedback = calculate_error(self.last_feedback, feedback_value)
 
             self.PTerm = self.Kp * error
             self.ITerm += self.Ki * error * delta_time

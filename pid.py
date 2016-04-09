@@ -54,6 +54,7 @@ class PID:
         self.ITerm = 0.0
         self.DTerm = 0.0
         self.last_error = 0.0
+        self.last_input = 0.0
 
         # Windup Guard
         self.int_error = 0.0
@@ -92,6 +93,7 @@ class PID:
             # Remember last time and last error for next calculation
             self.last_time = self.current_time
             self.last_error = error
+            self.last_input = cur_input
 
             self.output = self.PTerm + self.ITerm - (self.Kd * self.DTerm)
 

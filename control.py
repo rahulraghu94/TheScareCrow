@@ -48,6 +48,8 @@ def parseInput(data):
             pid[cmd[0]].setKi(float(value))
         elif cmd[1] == 'd':
             pid[cmd[0]].setKd(float(value))
+        elif cmd[1] == 'w':
+            pid[cmd[0]].windup_guard = float(value)
 
 def updateMpuValues():
     # get current FIFO count

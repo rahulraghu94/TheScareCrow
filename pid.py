@@ -62,7 +62,7 @@ class PID:
 
         self.output = 0.0
 
-    def update(self, error, feedback_value):
+    def update(self, feedback_value):
         """Calculates PID value for given reference feedback
         .. math::
             u(t) = K_p e(t) + K_i \int_{0}^{t} e(t)dt + K_d {de}/{dt}
@@ -78,6 +78,8 @@ class PID:
             delta_feedback = 360 - delta_feedback
 
         if (delta_time >= self.sample_time):
+            error = calculate_error(feedback_value)
+
             self.PTerm = self.Kp * error
             self.ITerm += self.Ki * error * delta_time
 
@@ -96,6 +98,21 @@ class PID:
             self.last_feedback = feedback_value
 
             self.output = self.PTerm + self.ITerm - (self.Kd * self.DTerm)
+
+    def calculate_error(self, actual):
+        # When the actual angle > desired angle as given by the
+        # right-hand rule, the error calculated is positive. That is,
+        # when looking in the opposite direction of the axis, if the
+        # actual angle is anti-clockwise from the desired, the error
+        # is positive
+        e = self.SetPoint - actual
+        if 360 - abs(e) < abs(e):
+            if e > 0:
+                e = - (360 - e)
+            else:
+                e = 360 + e
+
+        return e
 
     def setKp(self, proportional_gain):
         """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""

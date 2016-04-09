@@ -78,7 +78,7 @@ class PID:
             delta_feedback = 360 - delta_feedback
 
         if (delta_time >= self.sample_time):
-            error = calculate_error(feedback_value)
+            error = calculate_error(self.SetPoint, feedback_value)
 
             self.PTerm = self.Kp * error
             self.ITerm += self.Ki * error * delta_time
@@ -99,13 +99,13 @@ class PID:
 
             self.output = self.PTerm + self.ITerm - (self.Kd * self.DTerm)
 
-    def calculate_error(self, actual):
+    def calculate_error(self, desired, actual):
         # When the actual angle > desired angle as given by the
         # right-hand rule, the error calculated is positive. That is,
         # when looking in the opposite direction of the axis, if the
         # actual angle is anti-clockwise from the desired, the error
         # is positive
-        e = self.SetPoint - actual
+        e = desired - actual
         if 360 - abs(e) < abs(e):
             if e > 0:
                 e = - (360 - e)

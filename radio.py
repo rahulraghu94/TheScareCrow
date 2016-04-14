@@ -7,21 +7,21 @@ class Radio:
     # writing also. Only one pipe can be used for writing.
     pipes = ["1Node", "2Node"]
 
-    def __init__(self, channel=1, pa_level="RF24_PA_MAX", ce_pin=49):
+    def __init__(self, channel=1, pa_level=RF24_PA_MAX, ce_pin=49):
         self.r = RF24(ce_pin, 0)
         self.r.begin()
         self.r.setChannel(channel)
         self.r.setPALevel(pa_level)
         self.r.enableDynamicPayloads()
         self.r.setRetries(5,15)
-        self.r.openWritingPipe(pipes[0]);
-        self.r.openReadingPipe(1, pipes[1]);
+        self.r.openWritingPipe(self.pipes[0]);
+        self.r.openReadingPipe(1, self.pipes[1]);
         self.r.startListening();
 
-    def print_details():
+    def print_details(self):
         self.r.printDetails()
 
-    def get_data():
+    def get_data(self):
         if self.r.available():
             data = []
             while self.r.available():
@@ -31,7 +31,7 @@ class Radio:
         else:
             return None
 
-    def send_data(data):
+    def send_data(self, data):
         self.r.stopListening()
         radio.write(data)
         self.r.startListening()

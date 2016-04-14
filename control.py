@@ -20,8 +20,6 @@ mpu.dmpInitialize()
 mpu.setDMPEnabled(True)
 packetSize = mpu.dmpGetFIFOPacketSize()
 
-radio = radio.Radio()
-
 cmds = { 'p' : 0, 'r' : 0, 'y' : 0, # desired pitch, roll and yaw
          'pp' : 0, 'pi' : 0, 'pd' : 0, # Pitch PID
          'rp' : 0, 'ri' : 0, 'rd' : 0, # Roll PID
@@ -30,10 +28,10 @@ cmds = { 'p' : 0, 'r' : 0, 'y' : 0, # desired pitch, roll and yaw
 
 def parseInput(data):
     try:
-        cmd, value = data.split(' ') # command is in the format <string>.split(<delimiter>, [<max-split>])
+        cmd, value = str(data).rstrip('\n').split(' ') # command is in the format <string>.split(<delimiter>, [<max-split>])
         cmds[cmd] = float(value)
-    except ValueError:
-        print "Invalid input!"
+    except ValueError, e:
+        print "Invalid input!", "data:",data, "error:",e
         return
 
     if cmd == 't':
@@ -102,6 +100,14 @@ def updateMotors(mpuAngles):
     motors[2].write(cmds['t'] - op['pitch'] - op['roll'] - op['yaw'])
     motors[3].write(cmds['t'] + op['pitch'] - op['roll'] + op['yaw'])
 
+def radio_callback():
+    if radio.available():
+        data = radio.get_data()
+    if data != None:
+        for ip in data:
+            print "Radio input: ", ip
+            parseInput(ip)
+
 def calibrate():
     print "Calibrating..."
     for i in motors:
@@ -113,6 +119,9 @@ def calibrate():
     print "Calibrated."
 
 try:
+
+    radio = radio.Radio(callback=radio_callback)
+
     mpuAngles = {'pitch': 0, 'roll': 0, 'yaw': 0}
 
     startTime = time.time()
@@ -131,11 +140,6 @@ try:
         # check for DMP data -- should happen frequently
         if mpu.getIntStatus() >= 2:
             mpuAngles, fifoCount = updateMpuValues()
-
-        if radio.available():
-            data = radio.get_data().split("\n")
-            for input in data:
-                parseInput(input)
             updateMotors(mpuAngles)
 
         # debug info

@@ -75,11 +75,11 @@ class PID:
         delta_time = self.current_time - self.last_time
 
         if (delta_time >= self.sample_time):
-            error = calculate_error(self.SetPoint, feedback_value)
+            error = self.calculate_error(self.SetPoint, feedback_value)
             # The calculation for delta_feedback is the same as error
             # calculation with desired = last_feedback
             # and actual = feedback_value
-            delta_feedback = calculate_error(self.last_feedback, feedback_value)
+            delta_feedback = self.calculate_error(self.last_feedback, feedback_value)
 
             self.PTerm = self.Kp * error
             self.ITerm += self.Ki * error * delta_time

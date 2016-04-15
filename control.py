@@ -6,6 +6,7 @@ import select
 import sys
 from bbio import *
 from bbio.libraries.Servo import *
+import radio
 import time
 
 motors = []
@@ -18,6 +19,8 @@ mpu = mpu6050.MPU6050()
 mpu.dmpInitialize()
 mpu.setDMPEnabled(True)
 packetSize = mpu.dmpGetFIFOPacketSize()
+
+radio = radio.Radio()
 
 cmds = { 'p' : 0, 'r' : 0, 'y' : 0, # desired pitch, roll and yaw
          'pp' : 0, 'pi' : 0, 'pd' : 0, # Pitch PID
@@ -129,8 +132,10 @@ try:
         if mpu.getIntStatus() >= 2:
             mpuAngles, fifoCount = updateMpuValues()
 
-        if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-            parseInput(sys.stdin.readline())
+        if radio.available():
+            data = radio.get_data().split("\n")
+            for input in data:
+                parseInput(input)
             updateMotors(mpuAngles)
 
         # debug info

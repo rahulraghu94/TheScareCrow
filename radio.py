@@ -23,12 +23,15 @@ class Radio:
     def print_details(self):
         self.r.printDetails()
 
+    def radio_available(self):
+        return self.r.available()
+
     def get_data(self):
         if self.r.available():
-            data = []
+            data = ""
             while self.r.available():
                 len = self.payloadSize
-                data.append(self.r.read(len).decode('utf-8'))
+                data = data + self.r.read(len).decode('utf-8')
             return data
         else:
             return None

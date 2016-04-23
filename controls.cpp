@@ -6,6 +6,7 @@
 #include <ctime>
 #include <RF24/RF24.h>
 #include "PID.h"
+#include "motor.hpp"
 
 using namespace std;
 
@@ -24,10 +25,19 @@ PID *pids_ypr[3];
 double desired_ypr[3] = {0, 0, 0};
 double pids_output_ypr[3];
 
+float throttle = 0;
+
 RF24 radio(49, 0);
 const uint8_t pipes[][6] = {"1Node","2Node"};
 char radio_msg[32];
 
+Motor *motors[4];
+const BlackLib::pwnName motor_pins[4] = {
+	BlackLib::EHRPWM1A,
+	BlackLib::EHRPWM1B,
+	BlackLib::EHRPWM2A,
+	BlackLib::EHRPWM2B
+};
 
 void setup()
 {
@@ -60,6 +70,9 @@ void setup()
         for(int i = 0; i < 3; i++) {
 		pids_ypr[i] = new PID(&actual_ypr[i], &pids_output_ypr[i], &desired_ypr[i], 0, 0, 0, DIRECT);
         }
+
+	for(int i = 0; i < 4; i++)
+		motors[i] = new Motor(motor_pins[i]);
 }
 
 void loop() {
@@ -106,9 +119,28 @@ void loop() {
         /* Call PID::Compute(). This should be called as often as
          * possible. It is up to Compute() to decide when to update
          * the output */
-        for(int i = 0; i < 3; i++) {
-		if (pids_ypr[i]->Compute()) {
-/* update motors */
+	bool update_flag = false;
+        for (int i = 0; i < 3; i++) {
+		if (pids_ypr[i]->Compute())
+			update_flag = true;
+	}
+
+	if (update_flag) {
+		/* Ensure that update_flag is set when throttle is changed */
+		if (throttle < 2) {
+			for (int i = 0; i < 4; i++)
+				motors[i].set_power(0);
+		} else {
+			/* The output of the PID must be positive in
+			 * the direction of positive rotation
+			 * (right-hand rule. Also given on MPU)
+			 *
+			 * For yaw, motors 0 & 2 move anticlockwise from above.
+			 */
+			motors[0]->set_power(throttle - pids_ypr[0] + pids_ypr[1] - pids_ypr[2]);
+			motors[1]->set_power(throttle + pids_ypr[0] - pids_ypr[1] - pids_ypr[2]);
+			motors[2]->set_power(throttle - pids_ypr[0] - pids_ypr[1] + pids_ypr[2]);
+			motors[3]->set_power(throttle + pids_ypr[0] + pids_ypr[1] + pids_ypr[2]);
 		}
 	}
 

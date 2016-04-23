@@ -7,6 +7,8 @@
 #include <RF24/RF24.h>
 #include "PID.h"
 #include "motor.hpp"
+#include <string.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -35,6 +37,7 @@ float throttle = 0;
 RF24 radio(49, 0);
 const uint8_t pipes[][6] = {"1Node","2Node"};
 char radio_msg[32];
+char control_string[15];
 
 Motor *motors[4];
 const BlackLib::pwnName motor_pins[4] = {
@@ -43,6 +46,69 @@ const BlackLib::pwnName motor_pins[4] = {
 	BlackLib::EHRPWM2A,
 	BlackLib::EHRPWM2B
 };
+
+/* Parse a control string and execute the command */
+void parse_and_execute()
+{
+	char *command;
+	char *value;
+	float numeric_value;
+	int ypr_update_index = -1;
+	int pid_update_index = -1;
+
+	/* control_string is modified */
+	command = strtok(control_string, " ");
+	value = strtok(NULL, " ");
+	if (command && value) {
+		numeric_value = strtof(value, NULL);
+		if (command[0] == 't')
+			throttle = numeric_value;
+		else if (!strcmp(command, "y"))
+			desired_ypr[0] = numeric_value;
+		else if (!strcmp(command, "p"))
+			desired_ypr[1] = numeric_value;
+		else if (!strcmp(command, "r"))
+			desired_ypr[2] = numeric_value;
+		else {
+			/* PID tuning update.  In this case, the
+			 * command would be of the form:
+			 * "<y/p/r><p/i/d>"
+			 * Therefore, "pi" would mean the integral
+			 * tuning constant for pitch.
+			 */
+			switch(command[0]) {
+			case 'y':
+				ypr_update_index = 0;
+				break;
+			case 'p':
+				ypr_update_index = 1;
+				break;
+			case 'r':
+				ypr_update_index = 2;
+				break;
+			}
+			switch(command[1]) {
+			case 'p':
+				pid_update_index = 0;
+				break;
+			case 'i':
+				pid_update_index = 1;
+				break;
+			case 'd':
+				pid_update_index = 2;
+				break;
+			}
+			if (ypr_update_index != -1
+			    && pid_update_index != -1) {
+				pid_tunings[ypr_update_index][pid_update_index] = numeric_value;
+				SetTunings(pid_tunings[ypr_update_index][0],
+					   pid_tunings[ypr_update_index][1],
+					   pid_tunings[ypr_update_index][2]);
+			} else
+				fprintf(stderr, "Bad input");
+		}
+	}
+}
 
 void setup()
 {
@@ -124,6 +190,7 @@ void loop() {
 			radio.read(radio_msg, 32);
 		}
 		cout << radio_msg << endl;
+                /* TODO: Convert radio_msg into control_string cleanly. Consider strtok() */
 	}
 
         /* Call PID::Compute(). This should be called as often as

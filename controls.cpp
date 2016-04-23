@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <ctime>
+#include <RF24/RF24.h>
 
 using namespace std;
 
@@ -17,6 +18,10 @@ uint8_t fifo_buffer[64]; /* FIFO storage buffer */
 Quaternion q;           /* [w, x, y, z]         quaternion container */
 VectorFloat gravity;    /* [x, y, z]            gravity vector */
 float ypr[3];           /* [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector */
+
+RF24 radio(49, 0);
+const uint8_t pipes[][6] = {"1Node","2Node"};
+char radio_msg[32];
 
 void setup()
 {
@@ -36,6 +41,14 @@ void setup()
 		printf("DMP Initialization failed (code %d)\n", dev_status);
 		exit(0);
 	}
+
+	radio.begin();
+	radio.setPALevel(RF24_PA_MAX);
+	radio.setChannel(50);
+	radio.setRetries(15,15);
+	radio.openWritingPipe(pipes[1]);
+	radio.openReadingPipe(1,pipes[0]);
+	radio.startListening();
 }
 
 void loop() {
@@ -70,6 +83,13 @@ void loop() {
 		cout << endl;
 	}
 
+	/* If radio has data, read the damn data */
+	if (radio.available()) {
+		while (radio.available()) {
+			radio.read(radio_msg, 32);
+		}
+		cout << radio_msg << endl;
+	}
 }
 
 int main(int argc, char *argv[])

@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-c -w
 #CFLAGS=
 LDFLAGS= 
-SOURCES=I2Cdev.cpp MPU6050.cpp controls.cpp
+SOURCES=I2Cdev.cpp MPU6050.cpp PID.cpp controls.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=controls
 

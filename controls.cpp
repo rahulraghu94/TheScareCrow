@@ -5,6 +5,7 @@
 #include <iostream>
 #include <ctime>
 #include <RF24/RF24.h>
+#include "PID.h"
 
 using namespace std;
 
@@ -17,11 +18,16 @@ uint8_t fifo_buffer[64]; /* FIFO storage buffer */
 
 Quaternion q;           /* [w, x, y, z]         quaternion container */
 VectorFloat gravity;    /* [x, y, z]            gravity vector */
-float ypr[3];           /* [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector */
+double actual_ypr[3];           /* [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector */
+
+PID *pids_ypr[3];
+double desired_ypr[3] = {0, 0, 0};
+double pids_output_ypr[3];
 
 RF24 radio(49, 0);
 const uint8_t pipes[][6] = {"1Node","2Node"};
 char radio_msg[32];
+
 
 void setup()
 {
@@ -49,6 +55,11 @@ void setup()
 	radio.openWritingPipe(pipes[1]);
 	radio.openReadingPipe(1,pipes[0]);
 	radio.startListening();
+
+        /* Initialize PID controllers */
+        for(int i = 0; i < 3; i++) {
+		pids_ypr[i] = new PID(&actual_ypr[i], &pids_output_ypr[i], &desired_ypr[i], 0, 0, 0, DIRECT);
+        }
 }
 
 void loop() {
@@ -72,15 +83,16 @@ void loop() {
 		mpu.getFIFOBytes(fifo_buffer, packet_size);
 		mpu.dmpGetQuaternion(&q, fifo_buffer);
 		mpu.dmpGetGravity(&gravity, &q);
-		mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+		mpu.dmpGetYawPitchRoll((float *) actual_ypr, &q, &gravity);
 
 		cout << std::time(0) << " " << fifo_count << " ";
 		for (int i = 0; i < 3; i++) {
-			ypr[i] *= 180 / M_PI;
-			cout << ypr[i] << " ";
+			actual_ypr[i] *= 180 / M_PI;
+			cout << actual_ypr[i] << " ";
 		}
 		fifo_count -= packet_size;
 		cout << endl;
+
 	}
 
 	/* If radio has data, read the damn data */
@@ -90,6 +102,16 @@ void loop() {
 		}
 		cout << radio_msg << endl;
 	}
+
+        /* Call PID::Compute(). This should be called as often as
+         * possible. It is up to Compute() to decide when to update
+         * the output */
+        for(int i = 0; i < 3; i++) {
+		if (pids_ypr[i]->Compute()) {
+/* update motors */
+		}
+	}
+
 }
 
 int main(int argc, char *argv[])

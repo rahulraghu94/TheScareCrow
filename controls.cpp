@@ -19,7 +19,7 @@ uint8_t fifo_buffer[64]; /* FIFO storage buffer */
 
 Quaternion q;           /* [w, x, y, z]         quaternion container */
 VectorFloat gravity;    /* [x, y, z]            gravity vector */
-double actual_ypr[3];           /* [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector */
+double actual_ypr[3];   /* [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector */
 
 PID *pids_ypr[3];
 double desired_ypr[3] = {0, 0, 0};
@@ -49,7 +49,9 @@ void setup()
 	uint8_t dev_status;
 
 	mpu.initialize();
-	printf(mpu.testConnection() ? "MPU6050 connection successful\n" : "MPU6050 connection failed\n");
+	printf(mpu.testConnection() ?
+	       "MPU6050 connection successful\n" :
+	       "MPU6050 connection failed\n");
 	printf("Initializing DMP...\n");
 	dev_status = mpu.dmpInitialize();
 
@@ -73,7 +75,13 @@ void setup()
 
         /* Initialize PID controllers */
         for(int i = 0; i < 3; i++) {
-		pids_ypr[i] = new PID(&actual_ypr[i], &pids_output_ypr[i], &desired_ypr[i], pid_tunings[i][0], pid_tunings[i][1], pid_tunings[i][2], DIRECT);
+		pids_ypr[i] = new PID(&actual_ypr[i],
+				      &pids_output_ypr[i],
+				      &desired_ypr[i],
+				      pid_tunings[i][0],
+				      pid_tunings[i][1],
+				      pid_tunings[i][2],
+				      DIRECT);
         }
 
 	for(int i = 0; i < 4; i++)
@@ -88,7 +96,8 @@ void loop() {
 
 	fifo_count = mpu.getFIFOCount();
 
-	if ((fifo_count >= packet_size * 3 && fifo_count % packet_size == 0) || fifo_count == 1024) {
+	if ((fifo_count >= packet_size * 3 && fifo_count % packet_size == 0)
+	    || fifo_count == 1024) {
 		mpu.resetFIFO();
 		printf("FIFO Overflow");
 		fifo_count = mpu.getFIFOCount();

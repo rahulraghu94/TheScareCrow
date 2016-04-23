@@ -24,6 +24,11 @@ double actual_ypr[3];           /* [yaw, pitch, roll]   yaw/pitch/roll container
 PID *pids_ypr[3];
 double desired_ypr[3] = {0, 0, 0};
 double pids_output_ypr[3];
+double pid_tunings[3][3] = {
+	{0, 0, 0},
+	{0, 0, 0},
+	{0, 0, 0}
+};
 
 float throttle = 0;
 
@@ -68,7 +73,7 @@ void setup()
 
         /* Initialize PID controllers */
         for(int i = 0; i < 3; i++) {
-		pids_ypr[i] = new PID(&actual_ypr[i], &pids_output_ypr[i], &desired_ypr[i], 0, 0, 0, DIRECT);
+		pids_ypr[i] = new PID(&actual_ypr[i], &pids_output_ypr[i], &desired_ypr[i], pid_tunings[i][0], pid_tunings[i][1], pid_tunings[i][2], DIRECT);
         }
 
 	for(int i = 0; i < 4; i++)

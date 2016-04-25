@@ -151,7 +151,11 @@ void setup()
 		motors[i] = new Motor(motor_pins[i]);
 }
 
+<<<<<<< HEAD
 void loop() 
+=======
+void loop()
+>>>>>>> 56655ede3bc8c4649180c7c47e3afa091734526b
 {
 	static float yaw_target = 0;
 	char *control_string;
@@ -198,7 +202,11 @@ void loop()
 			radio.read(control_string, length);
 			cout << radio_msg << endl;
 			parse_and_execute(control_string);
+<<<<<<< HEAD
 		}	
+=======
+		}
+>>>>>>> 56655ede3bc8c4649180c7c47e3afa091734526b
                 /* TODO: Convert radio_msg into control_string cleanly. Consider strtok() */
 	}
 

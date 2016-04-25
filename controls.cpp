@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define MAX_PAYLOAD_SIZE 32
+
 using namespace std;
 
 MPU6050 mpu;
@@ -37,7 +39,6 @@ float throttle = 0;
 RF24 radio(49, 0);
 const uint8_t pipes[][6] = {"1Node","2Node"};
 char radio_msg[32];
-char control_string[15];
 
 Motor *motors[4];
 const BlackLib::pwnName motor_pins[4] = {
@@ -48,7 +49,7 @@ const BlackLib::pwnName motor_pins[4] = {
 };
 
 /* Parse a control string and execute the command */
-void parse_and_execute()
+void parse_and_execute(char *control_string)
 {
 	char *command;
 	char *value;
@@ -150,9 +151,12 @@ void setup()
 		motors[i] = new Motor(motor_pins[i]);
 }
 
-void loop() {
+void loop()
+{
 	static float yaw_target = 0;
+	char *control_string;
 
+	uint8_t payloadSize = MAX_PAYLOAD_SIZE
 	uint16_t channels[4];
 	float motor[4];
 
@@ -186,10 +190,15 @@ void loop() {
 
 	/* If radio has data, read the damn data */
 	if (radio.available()) {
+		control_string = "";
 		while (radio.available()) {
-			radio.read(radio_msg, 32);
+			if((length = radio.getPayloadSize() < 1){
+				fprintf(stderr, "%s\n", "Corrupt Packet");;
+			}
+			radio.read(control_string, length);
+			cout << radio_msg << endl;
+			parse_and_execute(control_string);
 		}
-		cout << radio_msg << endl;
                 /* TODO: Convert radio_msg into control_string cleanly. Consider strtok() */
 	}
 
